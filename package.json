@@ -1,0 +1,14 @@
+{
+  "name": "lr-application",
+  "version": "1.0.0",
+  "description": "Application to generate LR",
+  "main": "main.ts",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Himesh Aadeshara",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^22.1.0"
+  }
+}
