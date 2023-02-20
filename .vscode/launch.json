@@ -6,7 +6,7 @@
     "configurations": [
         {
             "command": "npm start",
-            "name": "Run Application",
+            "name": "Run app in debuge mode",
             "request": "launch",
             "type": "node-terminal"
         }
