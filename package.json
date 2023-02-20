@@ -4,11 +4,13 @@
   "description": "Application to generate LR",
   "main": "main.ts",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dev": "nodemon --exec electron ."
   },
   "author": "Himesh Aadeshara",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^22.1.0"
+    "electron": "^22.1.0",
+    "nodemon": "^2.0.20"
   }
 }
