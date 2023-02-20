@@ -1,8 +1,8 @@
 {
-  "name": "simple-electron-react",
-  "productName": "React Electron App",
+  "name": "LR-App",
+  "productName": "LR-App",
   "version": "1.0.0",
-  "description": "Simple boilerplate for building Electron apps with React",
+  "description": "Simple app to create LR",
   "license": "MIT",
   "engines": {
     "node": ">=9.0.0",
