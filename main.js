@@ -1,6 +1,6 @@
 const path = require('path')
 const url = require('url')
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, screen } = require('electron')
 
 let mainWindow
 
@@ -14,13 +14,18 @@ if (
 }
 
 function createMainWindow() {
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize
 	mainWindow = new BrowserWindow({
-		width: 1100,
-		height: 800,
+        title: "LR App",
+        width: width,
+        height: height,
 		show: false,
-		icon: `${__dirname}/assets/icon.png`,
+        icon: `${__dirname}/assets/icons/compass_256.png`,
         // The lines below solved the issue
+        resizable: isDev ? true : false,
+        autoHideMenuBar: true,
         webPreferences: {
+            devTools: false,
             nodeIntegration: true,
             contextIsolation: false
         }
@@ -59,7 +64,7 @@ function createMainWindow() {
 			installExtension(REACT_DEVELOPER_TOOLS).catch((err) =>
 				console.log('Error loading React DevTools: ', err)
 			)
-			mainWindow.webContents.openDevTools()
+			//mainWindow.webContents.openDevTools()
 		}
 	})
 
