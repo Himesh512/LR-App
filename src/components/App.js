@@ -2,27 +2,36 @@ import React, {useState} from 'react'
 import Container from 'react-bootstrap/Container'
 import Table from 'react-bootstrap/Table'
 import LogItem from './LogItem';
+import AddLogItem from './AddLogItem';
 
 const App = () => {
     const [logs, setLogs] = useState([
         {
             _id: 1,
-            text: 'This is long one',
-            priority:'low',
+            text: 'This is log one',
+            priority:'high',
             user: 'Brad',
             created: new Date().toString()
         },
         {
             _id: 2,
-            text: 'This is long two',
+            text: 'This is log two',
             priority: 'moderate',
             user: 'Kate',
+            created: new Date().toString()
+        },
+        {
+            _id: 3,
+            text: 'This is log three',
+            priority: 'low',
+            user: 'John',
             created: new Date().toString()
         }
     ]);
 
 	return (
 		<Container>
+            <AddLogItem/>
             <Table>
                 <thead>
                     <tr>
@@ -34,9 +43,11 @@ const App = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {logs.map((log) => (
-                        <LogItem key={log._id} log={log}/>
-                    ))}
+                    {
+                        logs.map((log) => (
+                            <LogItem key={log._id} log={log}/>
+                        ))
+                    }
                 </tbody>
             </Table>
         </Container>
