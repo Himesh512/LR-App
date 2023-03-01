@@ -1,22 +1,24 @@
-const path = require('path')
-const url = require('url')
-const { app, BrowserWindow, screen, ipcMain, Menu } = require('electron')
-const Log = require('/home/asite/LR-app/LR-App/models/Log.js')
-const connectDB = require('./config/db.js')
+const path = require('path');
+const url = require('url');
+const { app, BrowserWindow, screen, ipcMain, Menu } = require('electron');
+// use relative path instead of absolute path;
+//const Log = require('/home/asite/LR-app/LR-App/models/Log.js')
+const Log = require('./models/Log');
+const connectDB = require('./config/db.js');
 
 //Connect to database
-connectDB()
+connectDB();
 
-let mainWindow
-
-let isDev = false
+let mainWindow,
+    isDev = false;
+let indexPath;
 const isMac = process.platform === 'darwin' ? true : false
 
-if (
-	process.env.NODE_ENV !== undefined &&
-	process.env.NODE_ENV === 'development'
-) {
-	isDev = true
+if ( 
+    process.env.NODE_ENV !== undefined &&
+    process.env.NODE_ENV === 'development'
+    ) {
+	isDev = true;
 }
 
 function createMainWindow() {
@@ -29,15 +31,12 @@ function createMainWindow() {
 		icon: `${__dirname}/assets/icons/compass_256.png`,
 		// The lines below solved the issue
 		resizable: isDev ? true : false,
-		autoHideMenuBar: true,
 		webPreferences: {
-			devTools: false,
+			//devTools: false,
 			nodeIntegration: true,
 			contextIsolation: false
 		}
-	})
-
-	let indexPath
+	});
 
 	if (isDev && process.argv.indexOf('--noDevServer') === -1) {
 		indexPath = url.format({
@@ -54,7 +53,7 @@ function createMainWindow() {
 		})
 	}
 
-	mainWindow.loadURL(indexPath)
+	mainWindow.loadURL(indexPath);
 
 	// Don't show until we are ready and loaded
 	mainWindow.once('ready-to-show', () => {
@@ -77,45 +76,73 @@ function createMainWindow() {
 	mainWindow.on('closed', () => (mainWindow = null))
 }
 
-app.on('ready', () => {
-	createMainWindow()
-	// const mainMenu = Menu.buildFromTemplate(menu)
-	// Menu.setApplicationMenu(mainMenu)
-})
-
 const menu = [
-	...(isMac ? [{ role: 'appMenu' }] : []),
-	{
-		role: 'fileMenu'
-	},
-	{
-		role: 'editMenu'
-	},
-	{
-		lable: 'logs',
-		submenu: [
-			{
-				lable: 'Clear logs',
-				click: () => clearLogs(),
-			}
-		]
-	},
-	...(isDev ? [
-		{
-			lable: 'Developer',
-			submenu: [
-				{ role: 'reload' },
-				{ role: 'forcereload' },
-				{ role: 'separator' },
-				{ role: 'toggledevtools' }
-			]
-		}
-	] : [])
-]
+    ...(isMac ? [
+        { 
+            role: 'appMenu'
+        }] : []),
+    {
+        role: 'fileMenu'
+    },
+    {
+        role: 'editMenu'
+    },
+    // {
+    //     lable: 'logs',
+    //     submenu: [
+    //         {
+    //             lable: 'Clear logs',
+    //             click: () => clearLogs(),
+    //         }
+    //     ]
+    // },
+    // ...(isDev ? [
+    //     {
+    //         lable: 'Developer',
+    //         submenu: [
+    //             { role: 'reload' },
+    //             { role: 'forceReload' },
+    //             { role: 'separator' },
+    //             { role: 'toggleDevTools' }
+    //         ]
+    //     }
+    // ] : [])
+];
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit()
+    }
+});
+
+app.on('activate', () => {
+    if (mainWindow === null) {
+        createMainWindow()
+    }
+});
+
+// Send Log items
+async function sendLogs() {
+    try {
+        const logs = await Log.find().sort({ created: 1 })
+        mainWindow.webContents.send('logs:get', JSON.stringify(logs))
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+// Clear all logs
+async function clearLogs() {
+    try {
+        await Log.deleteMany({})
+        mainWindow.webContents, send('logs:clear')
+    } catch (err) {
+        console.log(err)
+    }
+}
+
 // load logs
 ipcMain.on('logs:load', sendLogs)
-
-
 
 // Create Log
 ipcMain.on('logs:add', async (e, item) => {
@@ -137,37 +164,11 @@ ipcMain.on('logs:delete', async (e, id) => {
 	}
 })
 
-// Send Log items
-async function sendLogs() {
-	try {
-		const logs = await Log.find().sort({ created: 1 })
-		mainWindow.webContents.send('logs:get', JSON.stringify(logs))
-	} catch (err) {
-		console.log(err)
-	}
-}
-
-// Clear all logs
-
-async function clearLogs() {
-	try {
-		await Log.deleteMany({})
-		mainWindow.webContents, send('logs:clear')
-	} catch (err) {
-		console.log(err)
-	}
-}
-app.on('window-all-closed', () => {
-	if (process.platform !== 'darwin') {
-		app.quit()
-	}
-})
-
-app.on('activate', () => {
-	if (mainWindow === null) {
-		createMainWindow()
-	}
-})
-
 // Stop error
-app.allowRendererProcessReuse = true
+app.allowRendererProcessReuse = true;
+
+app.on('ready', () => {
+    createMainWindow();
+    const mainMenu = Menu.buildFromTemplate(menu);
+    Menu.setApplicationMenu(mainMenu);
+});
